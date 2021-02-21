@@ -43,10 +43,7 @@ void init( void )
   {
     printf("fopen failed.\n"); exit(-1);
   }
-  else 
-  {
-  printf("%ld",(long)fi_out );
-  }
+
 }
 
 void R0_init( void )
@@ -71,7 +68,7 @@ void R1_Note_Select( void )
     val -= 12;
     count++;
   }  
-  uint8_t delta = scale[ val ] >> 2;
+  uint8_t delta = scale[ val ] >> 1;
 
   while( count > 0 )
   {
@@ -118,8 +115,8 @@ void R2_Envelope( void )
   }
   }
   env += env_pd[ env_state ];
-  //printf("R2, %d, %d, %d, %d", env_state, env, env_pd[ env_state ], env_peak );
-  //printf("\n");
+  printf("R2, %d, %d, %d, %d", env_state, env, env_pd[ env_state ], env_peak );
+  printf("\n");
     
 }
 
@@ -129,41 +126,52 @@ void R3_Trigger( void )
     env = 0;
 }
 
+void vca( int8_t osc_in )
+{
+  switch( env_state )
+  {
+    case 0: txtout( osc_in ); break;
+    case 1: txtout( osc_in ); break;
+    case 2: txtout(      0 ); break;
+  }  
+}
+
 void R4_Rotate( void )
 {        
         // R4 = update
         while( phase[ 0 ] >= 0 )     // phase wrap will muck it up!
         {
-          printf("0, ");
+          //printf("0, ");
           phase[ 0 ] += phase_delta[ 0 ];	
           //printf(" ph0,1=( %d, %d ) ",phase[ 0] , phase[ 1] );
-          printf("\n");
-          txtout( 1 );
+          //printf("\n");
+          vca( 1 );
         }
             
         while( phase[ 1 ] >= 0 )    
         {
-          printf("1, ");
+          //printf("1, ");
           //printf(" ph0,1=( %d, %d ) ",phase[ 0] , phase[ 1] );
-          printf("\n");
+          //printf("\n");
           phase[ 1 ] += phase_delta[ 1 ];
-          txtout( 0 );
+          vca( 0 );
           
         }  
         while( phase[ 0 ] <= 0 )    
         {
-          printf("2, ");
+          //printf("2, ");
           phase[ 0 ] += phase_delta[ 2 ];
           //printf(" ph0,1=( %d, %d ) ",phase[ 0] , phase[ 1] );
-          printf("\n");
-          txtout( 1 );
+          //printf("\n");
+          vca( 1 );
         }  
+        
         while( phase[ 1 ] < 0 )    {
-          printf("3, ");
+          //printf("3, ");
           //printf(" ph0,1=( %d, %d ) ",phase[ 0] , phase[ 1] );
           phase[ 1 ] += phase_delta[ 3 ];
-          printf("\n");
-          txtout( 0 );
+          //printf("\n");
+          vca( 0 );
         }  
         //printf("ph0,1=( %d, %d )",phase[ 0] , phase[ 1] );
         //printf("\n");
