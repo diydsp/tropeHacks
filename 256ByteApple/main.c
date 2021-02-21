@@ -4,6 +4,8 @@
 
 // R1 Note Select
 int8_t note = 0;
+uint8_t note_count = 24;
+uint8_t rot_count_max = 2;
 
 // R2 Envelope
 int8_t env_pd[ 3 ] = { 40, -10, 0 };  // attack, decay, paused
@@ -25,17 +27,18 @@ int8_t rot_count;
 // output
 
 FILE *fi_out;
-void txtout( char *str )
+void txtout( float val )
 {
   //return;
-  //fprintf( fi_out, str );
+  fprintf( fi_out, "%f\n", val);
+  //fprintf( fi_out, str, );
   //fprintf( fi_out, "xxx\n" );
   //fprintf( fi_out, "%c", 65 );
 }
 
 void init( void )
 {
-  FILE *fi_out =fopen("out.csv","w+");
+  fi_out =fopen("out.csv","w");
   if( fi_out== NULL )
   {
     printf("fopen failed.\n"); exit(-1);
@@ -135,7 +138,7 @@ void R4_Rotate( void )
           phase[ 0 ] += phase_delta[ 0 ];	
           //printf(" ph0,1=( %d, %d ) ",phase[ 0] , phase[ 1] );
           printf("\n");
-          //txtout( "1" );
+          txtout( 1 );
         }
             
         while( phase[ 1 ] >= 0 )    
@@ -144,7 +147,7 @@ void R4_Rotate( void )
           //printf(" ph0,1=( %d, %d ) ",phase[ 0] , phase[ 1] );
           printf("\n");
           phase[ 1 ] += phase_delta[ 1 ];
-          txtout( "0" );
+          txtout( 0 );
           
         }  
         while( phase[ 0 ] <= 0 )    
@@ -153,14 +156,14 @@ void R4_Rotate( void )
           phase[ 0 ] += phase_delta[ 2 ];
           //printf(" ph0,1=( %d, %d ) ",phase[ 0] , phase[ 1] );
           printf("\n");
-          txtout( "1" );
+          txtout( 1 );
         }  
         while( phase[ 1 ] < 0 )    {
           printf("3, ");
           //printf(" ph0,1=( %d, %d ) ",phase[ 0] , phase[ 1] );
           phase[ 1 ] += phase_delta[ 3 ];
           printf("\n");
-          txtout( "0" );
+          txtout( 0 );
         }  
         //printf("ph0,1=( %d, %d )",phase[ 0] , phase[ 1] );
         //printf("\n");
@@ -176,8 +179,10 @@ int main( int argc, char *argv [] )
   
     // R0 = init
 
-    while( 1 )
+    while( note_count > 0 )
     {    
+      note_count--;
+      
       R1_Note_Select();
       
       R3_Trigger();  // set env_state
@@ -185,15 +190,16 @@ int main( int argc, char *argv [] )
       grain_count = grain_count_max;
       while( grain_count > 0 )
       {
-        rot_count = 2;
+        grain_count--;
+
+        rot_count = rot_count_max;
         while( rot_count > 0 )
         {
-          //R4_Rotate();
           rot_count--;
+          R4_Rotate();
         }  
 
         R2_Envelope();  // env += env_pd
-        grain_count--;
       }
       
     }
