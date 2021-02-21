@@ -6,18 +6,19 @@
 int8_t note = 0;
 uint8_t note_count = 24;
 uint8_t rot_count_max = 2;
+uint8_t fund = 0;  // fundamental
 
 // R2 Envelope
-int8_t env_pd[ 3 ] = { 40, -10, 0 };  // attack, decay, paused
+int8_t env_pd[ 3 ] = { 2, -2, 0 };  // attack, decay, paused
 int8_t env = 0;
 int8_t env_state = 0;
-int8_t env_peak = 100;
+int8_t env_peak = 126;
 
-int8_t grain_count_max = 30;
+int8_t grain_count_max = 127;
 int8_t grain_count=0;
 
 // R4 rotate
-int8_t phase      [ 2 ] = {  0,  0 };
+int8_t phase       [ 2 ] = {  0,  0 };
 uint8_t phase_delta[ 4 ] = {  10,  10, 10, 20 };
 int8_t rot_count;
 
@@ -68,27 +69,18 @@ void R1_Note_Select( void )
     val -= 12;
     count++;
   }  
-  uint8_t delta = scale[ val ] >> 1;
+  fund = scale[ val ] >> 1;
 
   while( count > 0 )
   {
-    delta >>= 1;
+    fund >>= 1;
     count--;
   }
 
-  val = 0;  
-  int8_t harm;
-  for( harm = 1; harm >0; harm-- )
-  {
-    val += delta;  
-  }
-  
-  
-
-  phase_delta[ 0 ] = val;
-  phase_delta[ 1 ] = val;
-  phase_delta[ 2 ] = val;
-  phase_delta[ 3 ] = val;
+  phase_delta[ 0 ] = fund;
+  phase_delta[ 1 ] = fund;
+  phase_delta[ 2 ] = fund;
+  phase_delta[ 3 ] = fund;
   
   printf("R1,  %d, %d, %d, %d", phase_delta[ 0 ], phase_delta[ 1 ],
                                 phase_delta[ 2 ], phase_delta[ 3 ] );
@@ -96,28 +88,44 @@ void R1_Note_Select( void )
 
 }
 
-// env_pd[2],env, env_state
+
 void R2_Envelope( void )
 {
+  env += env_pd[ env_state ];
+
   switch( env_state )
   {
-  case 0:
-  if ( env > env_peak )        // increasing
-  {
-      env_state = 1;
+    case 0:
+    if( env >= env_peak )        // increasing
+    {
+        env_state = 1;
+        break;
+    }
+    case 1:  // decreasing
+    if( env < 0   )   
+    {
+      env = 0;
+      env_state = 2;
       break;
+    }
   }
-  case 1:
-  if ( env < 0   )   // decreasing
+
+
+  int8_t harm = 1 + ( env >> 4 );
+  uint16_t val = 0;  
+  for( ; harm >0; harm-- )
   {
-    env_state = 2;
-    break;
+    val += fund;  
   }
-  }
-  env += env_pd[ env_state ];
-  printf("R2, %d, %d, %d, %d", env_state, env, env_pd[ env_state ], env_peak );
+  val >>= 1;
+  phase_delta[ 0 ] = val;
+  phase_delta[ 1 ] = val;
+  phase_delta[ 2 ] = val;
+  phase_delta[ 3 ] = val;
+
+  printf("R2, %d, %d, %d, %d, %d, %d", env_state, env, env_pd[ env_state ], env_peak, val, fund);
   printf("\n");
-    
+      
 }
 
 void R3_Trigger( void )
@@ -200,6 +208,8 @@ int main( int argc, char *argv [] )
       {
         grain_count--;
 
+        R2_Envelope();  // env += env_pd
+
         rot_count = rot_count_max;
         while( rot_count > 0 )
         {
@@ -207,7 +217,6 @@ int main( int argc, char *argv [] )
           R4_Rotate();
         }  
 
-        R2_Envelope();  // env += env_pd
       }
       
     }
