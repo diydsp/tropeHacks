@@ -30,11 +30,7 @@ int8_t rot_count;
 FILE *fi_out;
 void txtout( float val )
 {
-  //return;
   fprintf( fi_out, "%f\n", val);
-  //fprintf( fi_out, str, );
-  //fprintf( fi_out, "xxx\n" );
-  //fprintf( fi_out, "%c", 65 );
 }
 
 void init( void )

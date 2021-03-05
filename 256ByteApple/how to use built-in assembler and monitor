@@ -1,0 +1,47 @@
+
+call -151   enter monitor
+
+ctrl-c, enter = leave, leave variables and BASIC program in memory
+ctrl-b, enter = leave, zap variables in memory, new BASIC program
+
+4-byte addr, e.g. 1000 = dump byte at addr, follow with return for 8 more
+2000.2010 = dump bytes between addrs, ctrl-s = pause, ctrl-x = stop
+
+300L = list/disassemble at 0x300
+
+c000L = list/dissaemble at 0xc000
+L by itself on a line = continue disassembly
+
+a000: 55 aa 69, enter bytes at a000
+:
+tT
+
+
+F666G  = enter mini-assmebler
+
+!  = start assembling
+300: nop
+300: dex
+!300
+
+! 
+
+any lined typed is assembled, unless first char is $
+
+first char: $ monitor command, 
+
+first char blank:  assembled instruction store at next addr
+
+otherwise:  assy instruction
+
+
+
+#
+
+
+255 = 397.0  Hz
+200 = 505.2 Hz
+150 = 671.3 Hz
+100 = 1000.4 Hz
+50  = 1962.4 Hz
+25  = 3779.4
