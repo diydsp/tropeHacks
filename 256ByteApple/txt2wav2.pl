@@ -40,6 +40,7 @@ $outnem=$_;
 
 $samplen=$len;   # used in prep_output function
 $samplerate=11025;   # TEMP TEMP TEM PTEM PTE TPMET PMTEPMT E shuld 44100
+$samplerate=8000;   # TEMP TEMP TEM PTEM PTE TPMET PMTEPMT E shuld 44100
 prep_output();   # setup wave file
 
 # copy data from txt into new file

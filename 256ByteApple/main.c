@@ -7,12 +7,13 @@ int8_t note = 0;
 uint8_t note_count = 24;
 uint8_t rot_count_max = 2;
 uint8_t fund = 0;  // fundamental
+uint8_t seq_pos = 0;
 
 // R2 Envelope
-int8_t env_pd[ 3 ] = { 2, -2, 0 };  // attack, decay, paused
-int8_t env = 0;
-int8_t env_state = 0;
-int8_t env_peak = 126;
+int8_t env = 0; // current level
+int8_t env_state = 0;   // attack, decay, paused
+int8_t env_pd[ 3 ] = { 4, -1, 0 };    // phase delta for env level
+int8_t env_peak = 100;
 
 int8_t grain_count_max = 127;
 int8_t grain_count=0;
@@ -50,14 +51,19 @@ void R0_init( void )
 
 void R1_Note_Select( void )
 {
+  uint8_t seq[]   = { 7,3,0,  5,2,0, 3,0,   12,15,12,9,  10,14,10,18 };
+    
   uint8_t scale[] = { 16*4, 17*4, 18*4, 19*4, 20*4, 22*4, 23*4,   // C - F#
                       24*4, 25*4, 27*4, 28*4, 30*4 };         // G - B
 
+  seq_pos++;if( seq_pos >= 16 ){ seq_pos = 0; }
   static int8_t scale_idx = -1;
   scale_idx++;
   if(scale_idx>=24){ scale_idx=0; }
   
-  uint8_t val = scale_idx;
+  //uint8_t val = scale_idx;
+  uint8_t val = seq[ seq_pos ];
+  
   uint8_t count = 0;
   uint8_t acc = 0;
   while( val > 11 )
@@ -185,36 +191,24 @@ void R4_Rotate( void )
 
 int main( int argc, char *argv [] )
 {
-
+  uint8_t note_count;
+  
   init();
   printf("\n");
   
     // R0 = init
 
-    while( note_count > 0 )
-    {    
-      note_count--;
-      
-      R1_Note_Select();
-      
-      R3_Trigger();  // set env_state
+//#define DO_X_N_TIMES(variable,numTimes) variable = numTimes; while( variable-- > 0 ){
 
-      grain_count = grain_count_max;
-      while( grain_count > 0 )
-      {
-        grain_count--;
-
-        R2_Envelope();  // env += env_pd
-
-        rot_count = rot_count_max;
-        while( rot_count > 0 )
-        {
-          rot_count--;
-          R4_Rotate();
+  note_count = 24;while( note_count-- > 0 ){ 
+               R1_Note_Select();
+               R3_Trigger();  // set env_state
+               grain_count = grain_count_max; while( grain_count-- > 0 ){ 
+                             R2_Envelope();  // env += env_pd
+                             rot_count = rot_count_max; while( rot_count-- > 0 ){ 
+                                         R4_Rotate();
         }  
-
       }
-      
     }
 
 
